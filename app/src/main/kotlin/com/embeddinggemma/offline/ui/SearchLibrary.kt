@@ -24,6 +24,7 @@ import com.embeddinggemma.offline.Thumb
 import com.embeddinggemma.offline.core.EmbeddingTask
 import com.embeddinggemma.offline.core.Modality
 import com.embeddinggemma.offline.data.*
+import com.embeddinggemma.offline.data.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -71,14 +72,16 @@ fun SearchScreen(app: AppState) {
     }
     fun doSearch(text: String = q) {
         if (text.isBlank()) return
-        val em = app.embedder() ?: run { note = "Install the model first (Settings)."; return }
+        val em = app.embedder()
+        if (em == null) { note = "Install the model first (Settings)."; return }
         app.store.addHistory(text)
         val t = task ?: when { ask -> EmbeddingTask.QUESTION_ANSWERING; filter == 4 -> EmbeddingTask.CODE_RETRIEVAL; else -> EmbeddingTask.SEARCH }
         run { app.search.search(em.query(text, t), text, filterObj(), hybrid) }
     }
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri ?: return@rememberLauncherForActivityResult
-        val em = app.embedder() ?: run { note = "Install the model first (Settings)."; return@rememberLauncherForActivityResult }
+        if (uri == null) return@rememberLauncherForActivityResult
+        val em = app.embedder()
+        if (em == null) { note = "Install the model first (Settings)."; return@rememberLauncherForActivityResult }
         if (!em.info.image) { note = "Installed model has no vision encoder."; return@rememberLauncherForActivityResult }
         run {
             val bytes = ctx.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
@@ -121,7 +124,7 @@ fun SearchScreen(app: AppState) {
                 }
             } else {
                 item { Title(if (r.isEmpty()) "No results" else if (ask) "Most relevant passages" else "Results") }
-                items(r, key = { it.chunk.id }) { res -> ResultRow(app, res) { vec -> run { app.search.search(vec, null, SearchFilter(), false) } } }
+                items(r, key = { it.chunk.id }) { res -> ResultRow(app, res) { vec -> run { app.search.search(vec, null, filterObj(), false) } } }
             }
         }
     }

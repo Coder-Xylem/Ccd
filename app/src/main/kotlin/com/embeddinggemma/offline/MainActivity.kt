@@ -8,6 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -51,7 +56,7 @@ fun Root(app: AppState) {
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
-                tabs.forEachIndexed { i, t -> NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = {}, label = { Text(t) }, alwaysShowLabel = true) }
+                tabs.forEachIndexed { i, t -> NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(navIcons[i], contentDescription = t) }, label = { Text(t) }, alwaysShowLabel = true) }
             }
         },
     ) { pad ->
@@ -60,6 +65,8 @@ fun Root(app: AppState) {
         }
     }
 }
+
+private val navIcons = listOf(Icons.Filled.Search, Icons.Filled.Book, Icons.Filled.Build, Icons.Filled.Settings)
 
 /** Small thumbnail for a content Uri, decoded off the main thread. */
 @Composable

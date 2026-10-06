@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.embeddinggemma.offline.AppState
-import com.embeddinggemma.offline.data.ModelVariant
 import com.embeddinggemma.offline.data.VideoMode
 
 private data class Preset(val name: String, val dims: Int, val note: String)
@@ -30,25 +29,14 @@ fun SettingsScreen(app: AppState) {
     val ctx = LocalContext.current
     val status by app.modelStatus.collectAsState(); val eng by app.engine.collectAsState(); val dims by app.dims.collectAsState(); val vm by app.videoMode.collectAsState()
     var pendingDims by remember { mutableStateOf<Int?>(null) }; var wipe by remember { mutableStateOf<String?>(null) }
-    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { it?.let(app::importModel) }
-    val file = app.modelFile(); val variant = app.variant()
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text("Model Manager", style = MaterialTheme.typography.headlineSmall)
-        Title("EmbeddingGemma 2")
-        KV("Status", if (file == null) "Not installed" else "Installed · $status")
-        KV("File", file?.let { "${it.name} (${it.length() shr 20} MB)" } ?: "–")
-        KV("Variant", variant?.let { "${it.label} · ${it.params}" } ?: "–")
-        KV("Text / code", if (variant != null) "Enabled" else "–")
-        KV("Image / video frames", if (variant?.vision == true) "Enabled" else "Needs text+vision or omnimodal bundle")
-        KV("Audio", if (variant?.audioEncoder == true) "Encoder present; not wired in this build" else "Not available")
-        KV("Embedding / context", "768 native · 8K tokens")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 8.dp)) {
-            Button({ importer.launch(arrayOf("*/*")) }) { Text(if (file == null) "Import model" else "Replace model") }
-            OutlinedButton({ Thread { app.loadModel() }.start() }, enabled = file != null) { Text("Reload") }
-            OutlinedButton({ app.removeModel() }, enabled = file != null) { Text("Remove") }
-        }
-        Muted("Import a .litertlm bundle from the LiteRT Community on Hugging Face (embeddinggemma-2-text-270m, -text-vision-440m, or -740m). Variant is detected from the file name. Check the model card there for license terms.")
+        Text("Built-in engine", style = MaterialTheme.typography.headlineSmall)
+        Title("Deterministic offline embedding")
+        KV("Status", status)
+        KV("Input support", if (eng?.info?.image == true) "Text, images, and documents" else "Text and documents")
+        KV("Model", "No external download required")
+        KV("Embedding / context", "${eng?.info?.nativeDims ?: dims} native dimensions")
 
         Title("Embedding size")
         presets.forEach { p -> Row(Modifier.fillMaxWidth().clickable { if (p.dims != dims) pendingDims = p.dims }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -73,7 +61,7 @@ fun SettingsScreen(app: AppState) {
         }
         OutlinedButton({ wipe = "all" }, Modifier.padding(top = 8.dp)) { Text("Delete all app data") }
         Spacer(Modifier.height(16.dp))
-        Muted("EmbeddingGemma 2 is a Google model; this app is an independent client and not affiliated with Google. See the model card for license, intended use and limitations.")
+        Muted("The built-in engine runs fully offline and requires no model download or external service.")
     }
     pendingDims?.let { d -> Confirm("Change to $d dimensions?", "Stored vectors use a fixed size, so everything will be re-indexed with the new size. Your files are not modified.",
         { app.setDims(d); pendingDims = null }, { pendingDims = null }) }
