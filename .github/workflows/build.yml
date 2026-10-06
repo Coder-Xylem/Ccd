@@ -28,13 +28,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
+        run: ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" testDebugUnitTest
 
       - name: Lint
-        run: ./gradlew --no-daemon lintDebug
+        run: ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" lintDebug
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug
+        run: ./gradlew --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" assembleDebug
 
       - uses: actions/upload-artifact@v4
         with:
