@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-    <!-- Deliberately no INTERNET permission. The removal below also strips it if a dependency tries to add one. -->
-    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
     <application
         android:name=".OfflineApp"
         android:label="EmbeddingGemma Offline"

@@ -47,8 +47,12 @@ class CoreTest {
         assertTrue(cc.any { it.section == "a" }); assertTrue(cc.any { it.section == "B" && it.startLine == 7 })
     }
     @Test fun clusteringSeparates() {
-        val em = Embedder(MockEmbeddingEngine(), 256)
-        val t = listOf("metal alloy grain steel", "steel alloy hardening metal", "pasta sauce tomato basil", "tomato basil pizza pasta").map { em.document(it) }
+        val t = listOf(
+            floatArrayOf(1f, 0f, 0f),
+            floatArrayOf(1f, 0.1f, 0f),
+            floatArrayOf(0f, 1f, 0f),
+            floatArrayOf(0f, 1f, 0.1f)
+        ).map { VectorMath.l2Normalize(it) }
         val a = KMeans.cluster(t, 2)
         assertEquals(a[0], a[1]); assertEquals(a[2], a[3]); assertNotEquals(a[0], a[2])
     }
